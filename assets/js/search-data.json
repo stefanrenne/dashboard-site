@@ -706,272 +706,279 @@
     
     "relUrl": "/extend/custom-widget/local.html"
   },"101": {
+    "doc": "Widgets",
+    "title": "Widgets",
+    "content": " ",
+    "url": "/part-widgets.html",
+    
+    "relUrl": "/part-widgets.html"
+  },"102": {
     "doc": "Providers",
     "title": "Providers",
     "content": "Many widgets need an API key, or a username and password. A provider is such an account, defined once under providers: in settings.yaml and used by every widget that needs it, as homepage’s providers: . # settings.yaml providers: radarr: \"{{DASHBOARD_VAR_RADARR_KEY}}\" # a text: the key nas: # a map: the options it names url: https://nas.lan:5001 username: dashboard password: \"{{DASHBOARD_VAR_NAS_PASSWORD}}\" . A widget uses one with provider: &lt;name&gt;: . # services.yaml - Media: - Radarr: href: http://radarr.lan:7878 widget: type: radarr url: http://radarr.lan:7878 provider: radarr # fills the key - Storage: - DiskStation: widget: type: diskstation provider: nas # fills url, username and password . ",
     "url": "/configuration/providers.html#providers",
     
     "relUrl": "/configuration/providers.html#providers"
-  },"102": {
+  },"103": {
     "doc": "Providers",
     "title": "How a provider fills a widget",
     "content": ". | A text fills the widget’s first secret option that the entry leaves out: its key or token. | A map fills the options it names, such as url, username, password or key, again only those the entry leaves out. Options a widget does not have are skipped. | What the entry sets itself always wins, so one provider can serve widgets that differ in one option. | . A provider that does not exist is a config error on the widget, shown at the top of the page. ",
     "url": "/configuration/providers.html#how-a-provider-fills-a-widget",
     
     "relUrl": "/configuration/providers.html#how-a-provider-fills-a-widget"
-  },"103": {
+  },"104": {
     "doc": "Providers",
     "title": "Keeping them secret",
     "content": ". | Nothing under providers: reaches the browser. Every value in it is a secret, also one written there literally; secret values are scrubbed from error messages too. | Use variables, not passwords: {{DASHBOARD_VAR_NAME}} takes the environment variable DASHBOARD_VAR_NAME, and {{DASHBOARD_FILE_NAME}} the contents of the file whose path is in DASHBOARD_FILE_NAME, such as a Docker secret (see Variables). settings.yaml then holds the names of the variables, not the passwords, and can be shared or kept in git. | . # compose.yaml of the dashboard services: dashboard: image: ghcr.io/stefanrenne/dashboard:latest environment: DASHBOARD_VAR_RADARR_KEY: 0123456789abcdef # or from an .env file next to compose.yaml DASHBOARD_FILE_NAS_PASSWORD: /run/secrets/nas_password secrets: [nas_password] secrets: nas_password: file: ./nas_password.txt . With DASHBOARD_FILE_NAS_PASSWORD, write \"{{DASHBOARD_FILE_NAS_PASSWORD}}\" in settings.yaml instead of the DASHBOARD_VAR_ form. ",
     "url": "/configuration/providers.html#keeping-them-secret",
     
     "relUrl": "/configuration/providers.html#keeping-them-secret"
-  },"104": {
+  },"105": {
     "doc": "Providers",
     "title": "Discovered services",
     "content": "A discovered service takes a provider the same way, as the Docker label dashboard.widget.provider (or dashboard.widgets[1].provider for the second widget), or the Kubernetes annotation getdashboard.dev/widget.provider: . # compose.yaml labels: - dashboard.name=Radarr - dashboard.widget.type=radarr - dashboard.widget.url=http://radarr:7878 - dashboard.widget.provider=radarr . ",
     "url": "/configuration/providers.html#discovered-services",
     
     "relUrl": "/configuration/providers.html#discovered-services"
-  },"105": {
+  },"106": {
     "doc": "Providers",
     "title": "Providers",
     "content": " ",
     "url": "/configuration/providers.html",
     
     "relUrl": "/configuration/providers.html"
-  },"106": {
+  },"107": {
     "doc": "Proxmox",
     "title": "Proxmox",
     "content": "The settings page edits this file under Proxmox as a form; “Advanced edit” opens it as text under Advanced. proxmox.yaml lists Proxmox nodes, for proxmoxNode: and proxmoxVMID: on a service (as in homepage): the VM’s or container’s state as a label in the card’s corner, with CPU and memory on a click. pve: # the node name, as in proxmoxNode url: https://pve.lan:8006 token: api@pam!dashboard # an API token id secret: \"{{DASHBOARD_VAR_PROXMOX_SECRET}}\" # its secret insecure: true # default: accept Proxmox's self-signed certificate . homepage’s older form, one url, token and secret at the top for every node, works too. Make the token under Datacenter &gt; Permissions &gt; API Tokens and give it the role PVEAuditor on /; see the Proxmox VM widget page. token and secret stay on the server. For a whole node or cluster on one card (VMs, containers, CPU, memory), use the Proxmox widget. ",
     "url": "/configuration/proxmox.html#proxmox",
     
     "relUrl": "/configuration/proxmox.html#proxmox"
-  },"107": {
+  },"108": {
     "doc": "Proxmox",
     "title": "Proxmox",
     "content": " ",
     "url": "/configuration/proxmox.html",
     
     "relUrl": "/configuration/proxmox.html"
-  },"108": {
+  },"109": {
     "doc": "Publishing",
     "title": "Publishing",
     "content": "CI (.github/workflows/ci.yml) does the work. Changes go to develop; main only moves to develop for a release, and a release is a tag on main. | Event | What CI does | . | Pull request | Tests, an amd64 image build and a smoke test. Nothing is pushed. Into develop, the tests use the widgets collection’s develop branch, otherwise its newest release. | . | Push to develop | Tests (with the collection’s develop branch), then the image for amd64 and arm64, pushed as develop only (version develop-&lt;sha&gt;). A push that changes only docs/, scripts/, tests/, examples/ or Markdown runs the tests only. | . | Push to main | Tests and the image for amd64 and arm64: nothing is pushed. | . | Tag vX.Y.Z | The same, pushed as latest, X.Y.Z and X.Y, and a GitHub release with that version’s CHANGELOG section. The tagged commit must be on main, or nothing is published. | . | Run by hand on main | As a tag, for package.json’s version when it is not released yet: CI creates the tag vX.Y.Z with the release. For when a tag cannot be pushed. | . | Run by hand on develop | As a push to develop (Dependabot’s auto-merge starts these). | . | Monday 04:23 UTC | Rebuild of the newest release (latest, X.Y.Z, X.Y), so base image security fixes arrive without a code change. | . A new push to a branch or a pull request cancels the older CI run of that branch or PR, which is still running. Runs for a tag, by hand and on the schedule are never cancelled. ",
     "url": "/extend/contributing/publishing.html#publishing",
     
     "relUrl": "/extend/contributing/publishing.html#publishing"
-  },"109": {
+  },"110": {
     "doc": "Publishing",
     "title": "Develop builds",
     "content": "ghcr.io/stefanrenne/dashboard:develop is the newest build of develop, to try what comes next; latest and the version tags stay on releases. A develop build reports develop-&lt;sha&gt; as its version (the footer links that commit) and installs the widgets collection from its develop branch instead of #latest, checked for new commits every pluginUpdateInterval (an hour by default). An entry for the collection in settings.yaml plugins: still wins. Going back to latest installs the collection’s newest release again. ",
     "url": "/extend/contributing/publishing.html#develop-builds",
     
     "relUrl": "/extend/contributing/publishing.html#develop-builds"
-  },"110": {
+  },"111": {
     "doc": "Publishing",
     "title": "Release steps",
     "content": "On develop, with everything for the release merged: . | Make sure CHANGELOG.md has everything under ## [Unreleased]. | Choose the version (semver) and set it in package.json (npm version &lt;x.y.z&gt; --no-git-tag-version). | Rename ## [Unreleased] to ## [x.y.z] - YYYY-MM-DD and add a fresh empty ## [Unreleased] above it. | Commit on develop and push it. | Move main to it: git push origin develop:main (a fast-forward; main never gets commits of its own, so this cannot fail unless someone pushed to main). | Tag that commit and push the tag: git tag -a vx.y.z -m vx.y.z, git push origin vx.y.z. CI fails the release when the CHANGELOG has no section for the version, or the tag is not on main. Without a tag push: run the CI workflow by hand on main (Actions &gt; CI &gt; Run workflow). | . A release of the widgets collection goes the same way (its develop, then main, then the tag). A change to the widget API is a release note of its own: say which apiVersion it belongs to. ",
     "url": "/extend/contributing/publishing.html#release-steps",
     
     "relUrl": "/extend/contributing/publishing.html#release-steps"
-  },"111": {
+  },"112": {
     "doc": "Publishing",
     "title": "Documentation site",
     "content": "getdashboard.dev is built from docs/ here, and published by a repository of its own, dashboard-site: its workflow site.yml builds the site and commits it to its gh-pages branch, which GitHub Pages serves (the domain is set there). It has two versions, with a menu in the header to switch (docs/_includes/header_custom.html): the release at the root, and develop under /develop/, with a banner on its pages, its widget pages from the collection’s develop, and robots.txt keeping it out of search engines. The menu opens the same page in the other version, or its home page when that page is not there.github/workflows/site.yml here starts that workflow (with a fine-grained token in the secret PAGES_DISPATCH_TOKEN, Actions read and write on dashboard-site; without it, it only says so): . | a push to develop: /develop/ is built again; | a push to main (a release): /develop/ is built again and copied to the root (scripts/pages-promote.sh), and /version.json gets the release’s version for the menu. No page is built for the release itself: what was on /develop/ is what is released; | a release of the widgets collection (its release job, with the same secret): the root is built from main’s docs with the collection at that release, and copied to the root the same way. | . A copy works because nothing on a page depends on the version it was built for, apart from what Jekyll writes for the base path: the menu and the banner read the version from the address, and pages-promote.sh points the base path (links, assets, the search index, canonical and redirect addresses) and the links to the develop branch at the root and main. So a page never links to develop’s address of the site itself (tests/pages.test.mjs checks). Jekyll builds it with the just-the-docs theme; the Markdown stays plain (no front matter), titles, the menu order and redirects from old addresses are in docs/_config.yml. The menu has four parts: Home (docs/README.md), Configuration (docs/configuration/, a page per file as in homepage), Widgets and Extend (docs/extend/). scripts/pages.sh stages one version (DOCS_CHANNEL=develop gives baseurl: /develop and GitHub links at develop): it points links outside docs/ at GitHub and wraps each page in {% raw %} so {{DASHBOARD_VAR_*}} examples stay literal. scripts/widget-images.mjs then photographs the widgets with example data, and scripts/pages-widgets.mjs adds a page per widget from its README.md and widget.yaml (with that image), split into service and header widgets, and the list of all of them on the Widgets page. Only a widget whose hash changed is photographed again: its folder in the collection, the collection’s mock, and what draws it here (RENDER_FILES in the script). The published images, with their &lt;id&gt;.hash files, are the cache (DOCS_IMAGE_CACHE); when every hash matches, Playwright does not even start. scripts/check-highlight.rb then runs every code block through Rouge, at the version GitHub Pages uses, and fails the build on one it would mark red (tests/pages.test.mjs catches the known cases locally, without Ruby). Widget pages stay at widgets/collection/&lt;id&gt;.html, whatever their section: other sites link there. A new page gets an entry under defaults: in docs/_config.yml; a moved page a redirect_from with its old address. ",
     "url": "/extend/contributing/publishing.html#documentation-site",
     
     "relUrl": "/extend/contributing/publishing.html#documentation-site"
-  },"112": {
+  },"113": {
     "doc": "Publishing",
     "title": "Dependabot",
     "content": ".github/dependabot.yml opens grouped weekly PRs for GitHub Actions, npm and the Docker base image, into develop: they ship with the next release. The Node major in the image is kept on an LTS line by hand (Dependabot ignores Node majors). dependabot-automerge.yml merges them when CI passes and builds develop. A PR that changes a workflow file needs a fine-grained token in the repository secret AUTOMERGE_TOKEN (Contents, Pull requests and Workflows: read and write); without it those PRs wait for a manual merge. ",
     "url": "/extend/contributing/publishing.html#dependabot",
     
     "relUrl": "/extend/contributing/publishing.html#dependabot"
-  },"113": {
+  },"114": {
     "doc": "Publishing",
     "title": "Publishing",
     "content": " ",
     "url": "/extend/contributing/publishing.html",
     
     "relUrl": "/extend/contributing/publishing.html"
-  },"114": {
+  },"115": {
     "doc": "Remote widget",
     "title": "A remote widget",
     "content": "A remote widget lives in a git repository or an npm package. Users add it with one line under plugins:; the dashboard downloads it, pins the version in plugins/plugins.lock.yaml and runs it. The widget is written as a local one; this page is about the repository around it. ",
     "url": "/extend/custom-widget/remote.html#a-remote-widget",
     
     "relUrl": "/extend/custom-widget/remote.html#a-remote-widget"
-  },"115": {
+  },"116": {
     "doc": "Remote widget",
     "title": "1. Start from the example repository",
     "content": "Start from dashboard-widget-example (Use this template on GitHub): the same widget as examples/widget-template, set up as a repository with tests that run without the dashboard and CI that releases a version tag, so users can install it with #latest. Then give it your widget’s id: . npm run rename -- my-nas --name \"My NAS\" . That renames example-counter everywhere: the id and name in widget.yaml, the dash-&lt;id&gt; element in client.js, name in package.json (dashboard-widget-&lt;id&gt;), the README and the tests. While you write it, point a test dashboard at your clone with path: (see a local widget). ",
     "url": "/extend/custom-widget/remote.html#1-start-from-the-example-repository",
     
     "relUrl": "/extend/custom-widget/remote.html#1-start-from-the-example-repository"
-  },"116": {
+  },"117": {
     "doc": "Remote widget",
     "title": "2. Document it",
     "content": "Give the widget a README.md in its folder, in the format of the widgets collection, so users find the same things in the same place: . | # &lt;name&gt;, as in widget.yaml. | What it shows, and what the user must set up in the service: where the API key is, which ids to fill in, when an option is only needed with authentication on. | ## Fields: every block key, so users know what to put in fields:. | ## Example: a complete services.yaml entry, with the key through {{DASHBOARD_VAR_...}}. | . Give each option in widget.yaml a line comment when its name does not explain it (url: { type: url, required: true } # e.g. http://radarr:7878). ",
     "url": "/extend/custom-widget/remote.html#2-document-it",
     
     "relUrl": "/extend/custom-widget/remote.html#2-document-it"
-  },"117": {
+  },"118": {
     "doc": "Remote widget",
     "title": "3. Publish",
     "content": ". | git: push, tag v1.0.0 (match version in widget.yaml). The example repository’s CI makes a GitHub release of each tag. | npm: npm publish (add the keyword dashboard-widget). A package with a package.json needs \"type\": \"module\". | . Bump version on every release; the dashboard installs each version in its own folder. ",
     "url": "/extend/custom-widget/remote.html#3-publish",
     
     "relUrl": "/extend/custom-widget/remote.html#3-publish"
-  },"118": {
+  },"119": {
     "doc": "Remote widget",
     "title": "4. Get listed",
     "content": "Add a row to the Catalogue with a pull request on the dashboard repository (docs/widgets/catalogue.md, in alphabetical order). A package is listed when it: . | is public: a git repository with release tags, or an npm package; | targets the current widget API (apiVersion: 2 in its widget.yaml); | has a README as in 2. Document it; | keeps keys and passwords in secret: true options, and marks options that run something or reach elsewhere discoverable: false (see the API reference). | . A listing says the package exists, not that it was reviewed. ",
     "url": "/extend/custom-widget/remote.html#4-get-listed",
     
     "relUrl": "/extend/custom-widget/remote.html#4-get-listed"
-  },"119": {
+  },"120": {
     "doc": "Remote widget",
     "title": "5. How users install it",
     "content": "# settings.yaml plugins: - source: git+https://github.com/you/dashboard-widget-my-nas#v1.0.0 # a tag, a branch or a 40-character commit - source: git+https://github.com/you/dashboard-widget-my-nas#latest # the newest release tag, checked hourly - source: npm:dashboard-widget-my-nas@1.0.0 - source: git+https://github.com/you/widgets#v3.0.0 subdir: widgets/my-nas # one widget of a repository with several - source: git+https://github.com/you/widgets#v3.0.0 only: [my-nas, my-router] # a collection: only these folders . A repository without widget.yaml at its root is a collection: every folder with a widget.yaml directly in it, or in its widgets/ folder, is installed. See Plugins for updates, the lock file and pluginUpdateInterval. Users run your code on their server: see Security for what a widget can reach and what to tell your users. ",
     "url": "/extend/custom-widget/remote.html#5-how-users-install-it",
     
     "relUrl": "/extend/custom-widget/remote.html#5-how-users-install-it"
-  },"120": {
+  },"121": {
     "doc": "Remote widget",
     "title": "Remote widget",
     "content": " ",
     "url": "/extend/custom-widget/remote.html",
     
     "relUrl": "/extend/custom-widget/remote.html"
-  },"121": {
+  },"122": {
     "doc": "Security",
     "title": "Widget security",
     "content": " ",
     "url": "/extend/security.html#widget-security",
     
     "relUrl": "/extend/security.html#widget-security"
-  },"122": {
+  },"123": {
     "doc": "Security",
     "title": "Trust model",
     "content": "A widget’s server.js runs with the dashboard’s rights: network, files in the container, environment variables. Installing a widget means trusting its author, like choosing a Docker image. The dashboard limits the damage where it can: . | Plugins come only from sources listed in settings.yaml, plus the project’s own widgets collection (#latest), which is always installed. The page cannot add a source; POST /api/plugins/sync only re-reads the config. | Sources are pinned. A git tag or commit, #latest (the newest release tag at install time), or an exact npm version, is recommended; a branch or range gives a warning. plugins/plugins.lock.yaml records the commit or the npm tarball integrity, so a restart installs exactly the same code without network access. A changed npm tarball for a locked version is refused. | npm pack runs with --ignore-scripts; nothing from a package runs during installation. | git, npm and ping get validated arguments without a shell (no --prefixed refs or names). | The default collection yields: a widget id from your own plugins: wins over the collection’s, and two of your own sources cannot share an id. | Host names are checked (allowedHosts in settings.yaml, see Allowed hosts): a web page that points a name of its own at your network (DNS rebinding) gets a refusal instead of the dashboard, so it cannot read it or press its buttons through your browser. * turns this off. | Actions run for anyone who can open the page, unless they ask for a password. Without a login: a widget with an action (the collection’s button running a script) does its thing for every visitor who presses it. With an admin password (settings.yaml adminPassword, a scrypt hash), root buttons, webhooks, the widget sync and every entry with confirm: password or always ask for it first (see Admin password); a correct one unlocks that browser for a while through an HttpOnly cookie the server keeps in memory, and guessing is slowed down per address. A passkey (see Passkeys) counts as the password: over HTTPS only, bound to the host name it was made on, with user verification, its challenge used once and a one-time token for the request that follows. | The settings page writes settings.yaml. It opens only with the admin password (or a login); a new admin password needs the current one, and only its hash is written. Without an admin password yet, it answers only the local network, and only to set one. Its endpoints read a JSON body (at most 64 KB) and need X-Requested-With: dashboard. | login: true closes the page itself (see Login page): every request needs a session, which the server keeps in .sessions.json (hashes of the tokens, mode 600) and checks each time; a logout or a new admin password ends it for good. Only /api/health, robots.txt and the login page stay open. Without it, anyone who can open the page reads it: put the dashboard behind your proxy’s authentication (see Authentication in front), or keep such buttons off a dashboard that is reachable from outside. Only the configured script or command runs; nothing in the request reaches it. | Root scripts are off unless you ask for them. Only with DASHBOARD_ALLOW_ROOT_SCRIPTS=true on the container does the image let node run /usr/local/bin/dashboard-root (bash as root) through sudo, for a button with user: root. Then every widget could, so a plugin you install can be root in the container too. A mounted Docker socket already gives that much: whoever can use the socket can start a root container. | The dashboard, and so every widget, runs as the unprivileged node user. The entrypoint is root only to give node a mounted Docker socket’s group, before the dashboard starts. | The setup wizard of a first install writes the config folder, lists the containers and runs a widget once to test it. It exists only while /config/.onboarding is there (an empty folder at the first start); every other request to it is a 404. It answers a visitor whose address, and every address a proxy passed on, is private; anyone else needs the code from the log (wrong ones are slowed down per address), and what it changes needs X-Requested-With: dashboard. Its endpoints are the only ones that read a request body: JSON only, at most 1 MB. It never overwrites a file that is there. | A mounted Docker socket gives every widget the whole Docker API (:ro does not limit it). Use a docker-socket-proxy with CONTAINERS=1 when you install widgets you do not fully trust. | Installed widgets’ server.js runs in a worker thread with a memory limit (DASHBOARD_WIDGET_MEMORY_MB, default 256): a widget stuck in a loop or eating memory stops the worker, which starts again, not the dashboard. A worker thread is not a security boundary: it has the same network and files (the config folder too). Its environment leaves out the DASHBOARD_VAR_* / DASHBOARD_FILE_* variables, so a widget reads only the values its options get. DASHBOARD_WIDGET_ISOLATION=off runs installed widgets in the dashboard process, as before. | Labels and annotations are not config. Whoever starts a container (or builds its image) writes its labels, so discovered services cannot use variables unless allowVariables lists them, nor set options marked discoverable: false, framed options, provider, references to other services or target: hidden-iframe (see What labels may do). Mark an option discoverable: false when it runs something or reaches elsewhere with the dashboard’s rights. | . ",
     "url": "/extend/security.html#trust-model",
     
     "relUrl": "/extend/security.html#trust-model"
-  },"123": {
+  },"124": {
     "doc": "Security",
     "title": "Secrets",
     "content": ". | Options marked secret: true, undeclared options, and every value from {{DASHBOARD_VAR_*}} / {{DASHBOARD_FILE_*}} stay on the server. /api/layout contains public options only (tested). | Error messages from widgets and config messages have secret values replaced by ***. | The settings page shows the config files with their secrets as tokens (__SECRET_…__): options marked secret: true, providers, adminPassword and Proxmox secrets written in the file itself. A save puts the values back on the server; {{DASHBOARD_VAR_*}} placeholders are shown as written, never filled in. The admin password is not changed through a file, only with the current one. | The page’s Content-Security-Policy restricts connect-src to the dashboard itself, and scripts to files it serves: the page’s own inline script carries a nonce that changes with every load, so an inline script or event handler that got into the page anyway does not run. | A widget’s client.js (and custom.js) runs in the page itself, by design: it can do what the page does (read /api/layout, call the endpoints with the page’s header, change other cards). Installing a widget trusts its client as much as its server. | . ",
     "url": "/extend/security.html#secrets",
     
     "relUrl": "/extend/security.html#secrets"
-  },"124": {
+  },"125": {
     "doc": "Security",
     "title": "Recommendations for users",
     "content": ". | Prefer widgets whose source you can read; pin tags or commits. | Put secrets in variables (DASHBOARD_VAR_*) or files (DASHBOARD_FILE_*, e.g. Docker secrets), not in the YAML. | Do not expose the dashboard to the internet without authentication: its login page, or a proxy with single sign-on in front (see Authentication in front). | Give Docker access through a socket proxy that only allows reading containers. | . ",
     "url": "/extend/security.html#recommendations-for-users",
     
     "relUrl": "/extend/security.html#recommendations-for-users"
-  },"125": {
+  },"126": {
     "doc": "Security",
     "title": "Security",
     "content": " ",
     "url": "/extend/security.html",
     
     "relUrl": "/extend/security.html"
-  },"126": {
+  },"127": {
     "doc": "Services",
     "title": "Services",
     "content": "services.yaml holds the cards: groups of services, each with a link, an icon, a status check and any number of widgets. Services can also be discovered from Docker labels and Kubernetes annotations. - Group name: - Service name: href: http://app.lan # link of the card icon: app.svg # dashboard-icons name (.svg/.png/.webp), /icons/..., or a URL description: One line statusStyle: dot # overrides settings.statusStyle for this service showStats: true # overrides settings.showStats for this service weight: 50 # order within the group, low first; default (position + 1) x 100 filter: widget.update == false # hide the card while this is true (see Filters) target: _self # overrides settings.target; hidden-iframe: the dashboard # server calls the URL (a webhook) and shows how it went confirm: none # a hidden-iframe webhook asks for the admin password; none: it does not # (also on a widget entry: password, always or none; see Admin password) # status check, the first one that is set: siteMonitor: http://app.lan # HTTP check (http-status widget) ping: app.lan # ICMP ping (ping widget) container: app # Docker container state (docker widget) server: local # which docker.yaml server; optional with one server proxmoxNode: pve # Proxmox VM or container state (proxmoxvm widget, proxmox.yaml) proxmoxVMID: 101 proxmoxType: qemu # qemu (a VM, default) or lxc (a container) app: app # Kubernetes: the pods labelled app.kubernetes.io/name=app (kubernetes-pods widget) namespace: apps # their namespace (default: default) podSelector: tier=web # another label selector instead of app's external: true # no pod status for this app # widgets: widget: type: custom-api url: http://app.lan/api mappings: [{ field: users, label: Users }] widgets: # or several - type: ping host: app.lan refreshInterval: 5000 # dashboard keys, for every widget: refreshInterval (ms) or fields: [latency] # refresh (5s), fields (which blocks), hide_errors . Nested groups, as in homepage: an entry whose value is a list (instead of a map) is a group inside the group. Its layout goes inside the parent’s layout in settings.yaml, and it is on the parent’s tab. # services.yaml - Infrastructure: - Router: href: http://router.lan - Network: # a nested group - Access point: href: http://ap.lan - Switch: href: http://switch.lan . # settings.yaml layout: Infrastructure: style: row Network: # the nested group's layout columns: 2 . Block highlighting, as in homepage: highlight: on a widget entry colours blocks by their value. Keys are block keys (the names fields: uses). The first matching rule wins; numeric rules are tried before string rules. widget: type: sonarr url: http://sonarr.lan:8989 key: \"{{DASHBOARD_VAR_SONARR_KEY}}\" highlight: queued: valueOnly: true # colour the value only, not the whole block numeric: - { level: danger, when: gte, value: 20 } - { level: warn, when: between, min: 5, max: 19 } - { level: good, when: eq, value: 0 } status: string: - { level: danger, when: regex, value: \"(failed|import) pending\" } . Numeric when: gt, gte, lt, lte, eq, ne (with value), between and outside (with min and/or max); numbers are read from formatted values such as 1,234 GB. String when: equals, includes, startsWith, endsWith (case-insensitive unless caseSensitive: true) and regex (flags, default i). Every rule takes negate: true. The colours per level can be changed in settings.yaml with homepage’s Tailwind classes; colours outside the dashboard’s palettes are ignored: . blockHighlights: levels: good: \"bg-emerald-500/40 text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-400\" warn: \"bg-amber-300/30 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200\" danger: \"bg-rose-700/45 text-rose-200 dark:bg-rose-950/70 dark:text-rose-400\" . Every check that is set gets its own label in the card’s top-right corner, as in homepage: the response time (or “down”) for siteMonitor and ping, the container state for container. Click a container label to see the container’s CPU and memory. ping also accepts a URL (ping: http://192.168.1.2). Icons: a dashboard-icons name, an mdi-, si- or sh- icon, a file in config/icons or a URL; see Images. The settings page edits this file under Services as a form; “Advanced edit” opens it as text under Advanced. ",
     "url": "/configuration/services.html#services",
     
     "relUrl": "/configuration/services.html#services"
-  },"127": {
+  },"128": {
     "doc": "Services",
     "title": "Filtering services",
     "content": "filter: on a service hides its card while an expression is true, such as filter: widget.update == false or filter: ping.attention; on one of its widgets it hides that widget. See Filters. ",
     "url": "/configuration/services.html#filtering-services",
     
     "relUrl": "/configuration/services.html#filtering-services"
-  },"128": {
+  },"129": {
     "doc": "Services",
     "title": "Services",
     "content": " ",
     "url": "/configuration/services.html",
     
     "relUrl": "/configuration/services.html"
-  },"129": {
+  },"130": {
     "doc": "Settings",
     "title": "Settings",
     "content": "settings.yaml holds everything about the page itself: title, language, look, the order and layout of the groups, and the widget packages to install. Every key is optional. title: Homelab description: The start page of my homelab # meta description, for link previews and search engines favicon: /icons/lab.svg # a URL, a dashboard-icons name (proxmox.svg) or a file in config/icons; default: dashboard.svg startUrl: / # where the installed app opens pwa: # installing the dashboard as an app (site.webmanifest) icons: # without icons, the favicon is the app icon - { src: /icons/app-192.png, sizes: 192x192, type: image/png } - { src: /icons/app-512.png, sizes: 512x512, type: image/png } shortcuts: # long-press menu of the app icon - { name: Media, url: \"/#media\", description: The media group } language: en # en, nl, fr, de, es, ca, he, hr, hu, it, nb-NO, pt, ru, sv, vi, zh-Hans, zh-Hant (zh-CN works too) theme: auto # auto, dark, light color: slate # a Tailwind colour: slate, gray, zinc, neutral, stone, red, orange, amber, yellow, lime, # green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose showTitle: true # false: the title is only the browser tab title (as in homepage) headerStyle: boxed # boxed, clean, underlined (a line under the header) or boxedWidgets (a box per widget) cardStyle: hairline # a thin border instead of the shadow blockStyle: refined # heavier, larger values in widget blocks font: plexData # IBM Plex Mono for values, the clock and status labels; plex: for everything quicklaunch: # start typing anywhere on the page to find a service, bookmark or web search searchDescriptions: true # also match descriptions (name matches come first) provider: duckduckgo # google, duckduckgo, bing, baidu, brave, startpage or custom (+ url); # default: the search widget's provider; none: no web search # url: https://search.lan/?q= # for custom: the query is appended, or put where {q} is target: _blank # where the web search opens showSearchSuggestions: true # suggestions from the search engine (default: the search widget's setting) # suggestionUrl: https://ac.search.lan/?q= # for custom: an OpenSearch suggestion URL hideInternetSearch: false # true: no web search entry hideVisitURL: false # true: no \"open &lt;url&gt;\" entry for typed addresses mobileButtonPosition: bottom-right # a search button on phones: top-left, top-right, bottom-left, bottom-right providers: # shared keys and logins (see Providers); a widget entry uses one with provider: &lt;name&gt; openweathermap: \"{{DASHBOARD_VAR_OWM_KEY}}\" # a text fills the widget's first secret option left empty (its key) longhorn: # a map fills the options it names url: https://longhorn.lan username: admin password: \"{{DASHBOARD_VAR_LONGHORN_PASSWORD}}\" instanceName: internal # for discovery labels meant for one dashboard (dashboard.instance.internal.href) hideVersion: true # hide the versions in the footer (shown by default, as in homepage): # `core v0.7.3 | widgets v0.4.1`, each linking to its release or commit pluginUpdateInterval: 1h # how often #latest and branch plugins are checked for a newer version (false: never) allowedHosts: [dash.lan] # the names you open the dashboard by (IP addresses always work); see Allowed hosts adminPassword: \"scrypt:16384:8:1:...\" # the admin password's hash (node src/hash-password.mjs); see Admin password login: true # a login page with the admin password ({ remember: 7d }); see Login page actions: remember: 15m # a correct admin password unlocks the browser this long (0: ask every press) disableUpdateCheck: true # do not ask GitHub once a day for a newer release (only asked while the version is shown) disableIndexing: true # ask search engines not to index the page (robots.txt and a robots meta tag) base: https://lab.example.com/dashboard/ # behind a reverse proxy under a sub path: the page's address logpath: /config # also log to &lt;logpath&gt;/logs/dashboard.log, rotated at 10 MiB, five files kept; # without it the log goes to stdout only. LOG_TARGETS (env): both, stdout or file showStats: true # container stats open from the start instead of on a click; a service can set its own statusStyle: dot # status labels: dot (a coloured dot) or basic (Online/Offline for siteMonitor and ping); # default: the response time and container state. A service can set its own. target: _blank # default link target of services background: https://example.com/wallpaper.jpg # optional; or a map, as in homepage: # background: # image: https://example.com/wallpaper.jpg # blur: sm # xs, sm, md, lg, xl, 2xl, 3xl # saturate: 50 # 0-200 (%) # brightness: 75 # 0-200 (%) # opacity: 50 # 0-100 (%) cardBlur: md # frosted cards over the background: xs, sm, md, lg, xl, 2xl, 3xl bookmarksStyle: icons # every bookmark group as icons only (a group can set iconsOnly: false) iconStyle: gradient # mdi- and si- icons: gradient (default) or theme (flat, in the theme colour) fullWidth: true # use the whole window width (default: at most 1280px) maxGroupColumns: 6 # groups side by side on wide screens (1536px and up), up to 8 maxBookmarkGroupColumns: 8 # the same for bookmark groups useEqualHeights: true # cards in a row equally high; a group can override it disableCollapse: true # group titles are plain titles, not fold buttons groupsInitiallyCollapsed: true # every group starts folded; a group's initiallyCollapsed wins layout: Media: columns: 3 # cards per row (2 on tablets, 1 on phones); the group spans the full width header: false # hide the group title initiallyCollapsed: true # start folded; viewers fold and unfold groups by clicking the title icon: plex.svg # category icon before the title: an icon name, /icons/..., or a URL useEqualHeights: false # overrides the global setting for this group Developer: # a bookmark group iconsOnly: true # only the icons, the name as tooltip Tools: style: column # default without columns: groups side by side, cards stacked discovery: interval: 30s plugins: - source: git+https://github.com/someone/dashboard-widget-x#v1.0.0 # tag, branch or 40-char commit - source: git+https://github.com/someone/dashboard-widget-v#latest # the newest release tag - source: npm:dashboard-widget-y@2.0.1 - source: git+https://github.com/someone/widgets#v3.0.0 subdir: widgets/z # a repo with several widgets - path: ./my-widgets/w # relative to the config folder - source: git+https://github.com/someone/widgets#v1.0.0 # a collection: every widget in it, only: [radarr, sonarr] # or only these folders . ",
     "url": "/configuration/settings.html#settings",
     
     "relUrl": "/configuration/settings.html#settings"
-  },"130": {
+  },"131": {
     "doc": "Settings",
     "title": "Plugins",
     "content": "The settings page edits this list under Widgets, and installs again or updates from there. The widgets collection is always installed, as git+https://github.com/stefanrenne/dashboard-widgets#latest; the entries under plugins: extend it. To pin it or take only some of its widgets, list that repository yourself (with a tag, only: or subdir:): your entry then takes its place. A widget of your own with the same id as one in the collection (for example a local checkout under path:) wins. Every widget comes from the collection, also the ones behind a service’s siteMonitor: (http-status), ping: (ping), container: (docker), app: (kubernetes-pods) and proxmoxNode: (proxmoxvm). An only: list for the collection always gets those five added, so the service fields keep working. An entry pinned to a release too old for them says so in the messages. The first start downloads the collection, so it needs network access once; after that the lock file keeps it without network. #latest installs the highest release tag (v1.2.3 or 1.2.3; pre-releases such as v2.0.0-beta.1 are skipped) and records it in plugins/plugins.lock.yaml. A restart keeps that release; POST /api/plugins/sync?update=1 (or deleting its entry from the lock file) moves it to the newest release. The folder of the previous version is then deleted. An update that fails (offline, a broken release) keeps the version that worked and says so in the messages. A branch named latest can no longer be used as #latest. The widgets collection is the exception: when its #latest is locked at a release older than the one this dashboard needs (0.4.0 for 0.6), the next start moves it to the newest release by itself. pluginUpdateInterval (default 1h, at least 1m, false turns it off) is how often the sources that can move (#latest, a branch) are asked for a newer version: one git ls-remote each, nothing is downloaded. Only a newer version is installed, which reloads the open pages; pinned tags and commits are never asked. plugins.lock.yaml then records the new version. The widgets collection is the exception: when its #latest is locked at a release older than the one this dashboard needs (0.4.0 for 0.6), the next start moves it to the newest release by itself. A source without widget.yaml at its root is a collection: every folder with a widget.yaml directly in it, or in its widgets/ folder, is installed. ",
     "url": "/configuration/settings.html#plugins",
     
     "relUrl": "/configuration/settings.html#plugins"
-  },"131": {
+  },"132": {
     "doc": "Settings",
     "title": "Layout",
     "content": "The settings page edits this block under Groups, keeping its form (a map or a list) and its comments. Order, as in homepage: groups appear in the order of the layout block, discovered groups too; groups that are not in it follow, in their own order. Service and bookmark groups can be mixed: a bookmark group listed between service groups is shown there. The layout block can also be a list, which reads more naturally when it is only about the order: . layout: - Media: - Developer: # a bookmark group, shown between Media and Infrastructure - Infrastructure: style: row . Tabs, as in homepage: give layout groups a tab and the page shows a tab bar. Service and bookmark groups without a tab show on every tab. Each tab has its own address: # plus its name in lowercase (http://dashboard.lan/#media). tabs: sets their order, an icon per tab and the tab that opens first, and header widgets can be on a tab too: see Tabs. layout: Infrastructure: tab: Home Developer: # a bookmark group tab: Home Media: tab: Media Tools: # no tab: on every tab style: row . Viewers can pick light, dark or “follow the system” and another colour with the buttons in the footer; that choice is remembered in their browser and overrides theme and color. To write a widget package of your own, see Extend. ",
     "url": "/configuration/settings.html#layout",
     
     "relUrl": "/configuration/settings.html#layout"
-  },"132": {
+  },"133": {
     "doc": "Settings",
     "title": "Settings",
     "content": " ",
     "url": "/configuration/settings.html",
     
     "relUrl": "/configuration/settings.html"
-  },"133": {
+  },"134": {
     "doc": "Tabs",
     "title": "Tabs",
     "content": "The settings page edits tabs under Tabs; a group’s tab is chosen under Groups and a header widget’s under Header widgets. Tabs split the dashboard into pages: a tab bar under the header, and each tab shows its own groups and header widgets. Groups and header widgets without a tab are on every tab, so a search box or a group of tools can stay put while the rest changes. Each tab has its own address: # and its name in lowercase, with spaces as %20 (http://dashboard.lan/#media, http://dashboard.lan/#home%20lab). Use it for a bookmark, a browser start page, startUrl or a PWA shortcut. Without a #, the page opens on the tab marked default, or else on the first one. ",
     "url": "/configuration/tabs.html#tabs",
     
     "relUrl": "/configuration/tabs.html#tabs"
-  },"134": {
+  },"135": {
     "doc": "Tabs",
     "title": "The tabs",
     "content": "tabs: in settings.yaml lists the tabs in the order of the tab bar. A tab is just its name, or a map with a name, an icon and default: . tabs: - Home - name: Media icon: mdi-play-circle # any icon a service takes: mdi-, si-, sh-, dashboard-icons, /icons/... default: true # opens without a # in the address (one tab) - name: Lab icon: proxmox.svg . tabs: is optional. A tab a group names (see below) is a tab too: those that tabs: does not list follow it, in the order of the layout block. homepage’s configuration, which has no tabs:, keeps working as it is. ",
     "url": "/configuration/tabs.html#the-tabs",
     
     "relUrl": "/configuration/tabs.html#the-tabs"
-  },"135": {
+  },"136": {
     "doc": "Tabs",
     "title": "Groups on a tab",
     "content": "A group gets its tab in the layout block of settings.yaml, as in homepage. This works for service groups and bookmark groups alike. A nested group is on its parent’s tab. layout: Infrastructure: tab: Lab Media: tab: Media Developer: # a bookmark group tab: Home Tools: # no tab: on every tab style: row . Discovered groups . A container or Ingress can put its group on a tab with the tab label (Docker) or annotation (Kubernetes). It is used when the layout block gives that group no tab; when two services of one group name different tabs, the first one counts and the other gets a warning. labels: dashboard.name: Jellyfin dashboard.group: Media dashboard.tab: Media . annotations: getdashboard.dev/enabled: \"true\" getdashboard.dev/group: Monitoring getdashboard.dev/tab: Lab . ",
     "url": "/configuration/tabs.html#groups-on-a-tab",
     
     "relUrl": "/configuration/tabs.html#groups-on-a-tab"
-  },"136": {
+  },"137": {
     "doc": "Tabs",
     "title": "Header widgets on a tab",
     "content": "A widget in widgets.yaml takes tab: with a tab name, or a list of them for several tabs. Without it, it is on every tab. The header box is left out on a tab without any header widget. - datetime: dateStyle: long # every tab - resources: cpu: true memory: true tab: Lab - openmeteo: latitude: 52.37 longitude: 4.89 tab: [Home, Media] . A name that is no tab gives a warning; a widget whose names are all unknown is shown on every tab. A widget that declares an option called tab itself gets the value as its own option. ",
     "url": "/configuration/tabs.html#header-widgets-on-a-tab",
     
     "relUrl": "/configuration/tabs.html#header-widgets-on-a-tab"
-  },"137": {
+  },"138": {
     "doc": "Tabs",
     "title": "On the settings page",
     "content": "Under Tabs you add, rename, reorder and remove tabs, give them an icon and choose the one that opens first. Saving writes tabs: only when it is needed (an icon, a default, an order of its own, or a tab no group names yet). | Renaming a tab moves its groups and header widgets with it: settings.yaml and widgets.yaml are both updated. | Removing a tab puts its groups and header widgets on every tab. | . The Tab field of a group (under Groups) and the Shown on boxes of a header widget (under Header widgets) choose from these tabs. ",
     "url": "/configuration/tabs.html#on-the-settings-page",
     
     "relUrl": "/configuration/tabs.html#on-the-settings-page"
-  },"138": {
+  },"139": {
     "doc": "Tabs",
     "title": "Refreshing",
     "content": "Widgets on a tab that is not shown do not ask for data. They ask as soon as their tab opens, and from then on at their normal interval. ",
     "url": "/configuration/tabs.html#refreshing",
     
     "relUrl": "/configuration/tabs.html#refreshing"
-  },"139": {
+  },"140": {
     "doc": "Tabs",
     "title": "Tabs",
     "content": " ",
