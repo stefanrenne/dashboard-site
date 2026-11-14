@@ -35,7 +35,6 @@ env:
   MODE: ${{ inputs.mode }}
   DASHBOARD: stefanrenne/dashboard
   COLLECTION: stefanrenne/dashboard-widgets
-  DOMAIN: getdashboard.dev
 
 jobs:
   build:
@@ -142,7 +141,7 @@ jobs:
           if [ "$MODE" != develop ]; then
             printf '{ "release": "%s" }\n' "$(node -p "require('$W/dashboard-main/package.json').version")" > version.json
           fi
-          printf '%s\n' "$DOMAIN" > CNAME
+          # CNAME is GitHub's: Settings > Pages writes it when the domain is set, and it stays
           printf 'User-agent: *\nDisallow: /develop/\n' > robots.txt
           touch .nojekyll
           git add -A
