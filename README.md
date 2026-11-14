@@ -25,7 +25,7 @@ versions out of search engines.
 |---|---|---|
 | `dashboard-develop` | a push to dashboard's `develop` | builds `/develop/` again |
 | `dashboard-release` | a push to dashboard's `main` | builds `/develop/` again, then **copies** it to `/` |
-| `widgets-develop` | a push to the collection's `develop` (docs, widgets, its mock) | builds `/widgets/develop/` again |
+| `widgets-develop` | a push to the collection's `develop` (docs, widgets, its mock), or to dashboard's (the theme, menus and scripts are there) | builds `/widgets/develop/` again |
 | `widgets-release` | a release of the collection | builds `/widgets/develop/` again, then **copies** it to `/widgets/` |
 | `bootstrap` | by hand | all four: a whole site, the latest parts from dashboard's `main` and the newest collection release |
 
