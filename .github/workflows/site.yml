@@ -32,9 +32,12 @@ on:
 permissions:
   contents: write
 
-# one at a time, in order: each run starts from what the last one published
+# one run per mode at a time. GitHub keeps one waiting run per group and drops an older waiting
+# one: within a mode that is harmless (the newer one builds the newer state), so each mode has its
+# own group and a release is never dropped for a develop build. Runs of different modes publish
+# in turn: see Publish.
 concurrency:
-  group: site
+  group: site-${{ inputs.mode }}
   cancel-in-progress: false
 
 env:
@@ -174,6 +177,9 @@ jobs:
           source: stage-widgets-latest
           destination: built-widgets-latest
 
+      # Publishes this run's part(s) on the newest gh-pages: when another run published meanwhile
+      # (the push is refused), it starts again from that one, up to five times. The parts are
+      # separate folders, so each run only replaces its own.
       - name: Publish
         env:
           TAG: ${{ steps.collection.outputs.tag }}
@@ -184,32 +190,41 @@ jobs:
           dashboard=""
           [ -d dashboard-main ] && dashboard=$(node -p "require('$W/dashboard-main/package.json').version")
           cd site
-          if [ -d ../built-dashboard-develop ]; then rm -rf develop && cp -R ../built-dashboard-develop develop; fi
-          if [ -d ../built-widgets-develop ]; then mkdir -p widgets && rm -rf widgets/develop && cp -R ../built-widgets-develop widgets/develop; fi
-          case "$MODE" in
-            dashboard-release) DOCS_PART=dashboard sh "$promote" . "$dashboard" ;;
-            widgets-release) DOCS_PART=widgets sh "$promote" . "$TAG" ;;
-            bootstrap)
-              DOCS_PART=dashboard sh "$promote" . "$dashboard" "$W/built-dashboard-latest"
-              DOCS_PART=widgets sh "$promote" . "$TAG" "$W/built-widgets-latest"
-              ;;
-          esac
-          # the latest version of each part, for the menus
-          node -e '
-            const fs = require("fs");
-            let v = {};
-            try { v = JSON.parse(fs.readFileSync("version.json", "utf8")); } catch {}
-            delete v.release;
-            const [mode, dashboard, tag] = process.argv.slice(1);
-            if (["dashboard-release", "bootstrap"].includes(mode)) v.dashboard = dashboard;
-            if (["widgets-release", "bootstrap"].includes(mode)) v.widgets = tag.replace(/^v/, "");
-            fs.writeFileSync("version.json", JSON.stringify(v) + "\n");
-          ' "$MODE" "$dashboard" "$TAG"
-          # CNAME is GitHub's: Settings > Pages writes it when the domain is set, and it stays
-          printf 'User-agent: *\nDisallow: /develop/\nDisallow: /widgets/develop/\n' > robots.txt
-          touch .nojekyll
-          git add -A
-          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
-          git commit -q -m "$MODE: dashboard develop $(git -C "$W/dashboard" rev-parse --short HEAD), collection $TAG"
-          git push -q origin gh-pages
-          git log --oneline -1
+          publish() {
+            if [ -d ../built-dashboard-develop ]; then rm -rf develop && cp -R ../built-dashboard-develop develop; fi
+            if [ -d ../built-widgets-develop ]; then mkdir -p widgets && rm -rf widgets/develop && cp -R ../built-widgets-develop widgets/develop; fi
+            case "$MODE" in
+              dashboard-release) DOCS_PART=dashboard sh "$promote" . "$dashboard" ;;
+              widgets-release) DOCS_PART=widgets sh "$promote" . "$TAG" ;;
+              bootstrap)
+                DOCS_PART=dashboard sh "$promote" . "$dashboard" "$W/built-dashboard-latest"
+                DOCS_PART=widgets sh "$promote" . "$TAG" "$W/built-widgets-latest"
+                ;;
+            esac
+            # the latest version of each part, for the menus
+            node -e '
+              const fs = require("fs");
+              let v = {};
+              try { v = JSON.parse(fs.readFileSync("version.json", "utf8")); } catch {}
+              delete v.release;
+              const [mode, dashboard, tag] = process.argv.slice(1);
+              if (["dashboard-release", "bootstrap"].includes(mode)) v.dashboard = dashboard;
+              if (["widgets-release", "bootstrap"].includes(mode)) v.widgets = tag.replace(/^v/, "");
+              fs.writeFileSync("version.json", JSON.stringify(v) + "\n");
+            ' "$MODE" "$dashboard" "$TAG"
+            # CNAME is GitHub's: Settings > Pages writes it when the domain is set, and it stays
+            printf 'User-agent: *\nDisallow: /develop/\nDisallow: /widgets/develop/\n' > robots.txt
+            touch .nojekyll
+            git add -A
+            if git diff --cached --quiet; then echo "nothing changed"; return 0; fi
+            git commit -q -m "$MODE: dashboard develop $(git -C "$W/dashboard" rev-parse --short HEAD), collection $TAG"
+            git push -q origin gh-pages
+          }
+          for try in 1 2 3 4 5; do
+            if publish; then git log --oneline -1; exit 0; fi
+            echo "gh-pages moved on (try $try): again on the newest"
+            sleep $((try * 5))
+            git fetch -q --depth 1 origin gh-pages && git reset -q --hard FETCH_HEAD && git clean -qfdx
+          done
+          echo "::error::could not publish after 5 tries"
+          exit 1

@@ -29,6 +29,9 @@ versions out of search engines.
 | `widgets-release` | a release of the collection | builds `/widgets/develop/` again, then **copies** it to `/widgets/` |
 | `bootstrap` | by hand | all four: a whole site, the latest parts from dashboard's `main` and the newest collection release |
 
+Each mode has its own concurrency group: runs of different modes can run at once, and each one
+publishes its own part on the newest `gh-pages` (again, when another run published meanwhile).
+
 A release is a copy of its part's develop site, and leaves the other part alone: what was on the
 develop address is what is released. The pages do not depend on the version they were built for
 (the menus read it from the address), and dashboard's `scripts/pages-promote.sh` points the base
