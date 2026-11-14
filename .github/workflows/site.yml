@@ -1,0 +1,153 @@
+name: Site
+
+# Builds https://getdashboard.dev/ into the gh-pages branch, which GitHub Pages serves: the docs
+# of stefanrenne/dashboard (docs/, staged by its scripts) and a page per widget of
+# stefanrenne/dashboard-widgets. The release is at the root, develop under /develop/.
+#
+#   develop     /develop/ again, from dashboard's develop and the collection's develop
+#               (started by a push to dashboard's develop)
+#   release     develop as above, then /develop/ copied to the root and version.json written
+#               (started by a push to dashboard's main: a release)
+#   collection  the root again, from dashboard's main docs and the collection's newest release
+#               (started by a collection release)
+#   bootstrap   develop, then collection: a first site, or one to start over from
+#
+# The published widget images, with their .hash files, are the cache: only a widget whose hash
+# changed is photographed again, and Playwright starts only when one did.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: What to build
+        type: choice
+        options: [develop, release, collection, bootstrap]
+        default: develop
+
+permissions:
+  contents: write
+
+# one at a time, in order: each run starts from what the last one published
+concurrency:
+  group: site
+  cancel-in-progress: false
+
+env:
+  MODE: ${{ inputs.mode }}
+  DASHBOARD: stefanrenne/dashboard
+  COLLECTION: stefanrenne/dashboard-widgets
+  DOMAIN: getdashboard.dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # develop's scripts stage every version; main gives only its docs (and its version)
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.DASHBOARD }}
+          ref: develop
+          path: dashboard
+      - if: env.MODE != 'develop'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.DASHBOARD }}
+          ref: main
+          path: dashboard-main
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.COLLECTION }}
+          ref: develop
+          path: collection-develop
+      - name: Newest release of the widgets collection
+        id: collection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "tag=$(gh release view --repo "$COLLECTION" --json tagName --jq .tagName)" >> "$GITHUB_OUTPUT"
+      - if: env.MODE == 'collection' || env.MODE == 'bootstrap'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.COLLECTION }}
+          ref: ${{ steps.collection.outputs.tag }}
+          path: collection-release
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - run: npm ci --omit=dev --no-audit --no-fund
+        working-directory: dashboard
+      - name: The published site (gh-pages), or a new one
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q site
+          cd site
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth 1 origin gh-pages; then git checkout -q -b gh-pages FETCH_HEAD; else git checkout -q --orphan gh-pages; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: gem install --user-install --no-document rouge -v 3.30.0
+
+      # stage <name> <docs dir> <collection dir> <tag> <image cache>: a develop build (baseurl
+      # /develop) staged in stage-<name>; in Playwright's image when a widget needs a new picture
+      - name: Stage
+        run: |
+          W=$GITHUB_WORKSPACE
+          stage() {
+            stale=$(cd "$W/dashboard" && node scripts/widget-images.mjs --stale "$W/$3" --cache "$5")
+            echo "stage-$1: $stale widget images to take"
+            cmd="cd '$W/dashboard' && DOCS_CHANNEL=develop DOCS_DIR='$2' DOCS_IMAGE_CACHE='$5' scripts/pages.sh '$W/stage-$1' '$DASHBOARD' '$W/$3' '$4'"
+            if [ "$stale" -gt 0 ]; then
+              v=$(npm view playwright version)
+              docker run --rm --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$W:$W" -w "$W" "mcr.microsoft.com/playwright:v$v-noble" \
+                sh -c "cd '$W/dashboard' && npm install --no-save --no-audit --no-fund playwright@$v && $cmd"
+            else
+              sh -c "$cmd"
+            fi
+            ruby "$W/dashboard/scripts/check-highlight.rb" "$W/stage-$1"
+          }
+          if [ "$MODE" != collection ]; then
+            stage develop "$W/dashboard/docs" collection-develop develop "$W/site/develop/widgets/collection/images"
+          fi
+          if [ "$MODE" = collection ] || [ "$MODE" = bootstrap ]; then
+            # main's docs with develop's menu (main's own may be older than this setup)
+            cp -R "$W/dashboard-main/docs" "$W/main-docs"
+            cp -R "$W/dashboard/docs/_includes/." "$W/main-docs/_includes/"
+            stage release "$W/main-docs" collection-release "${{ steps.collection.outputs.tag }}" "$W/site/widgets/collection/images"
+          fi
+          ls -d "$W"/stage-*
+
+      - if: env.MODE != 'collection'
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: stage-develop
+          destination: built-develop
+      - if: env.MODE == 'collection' || env.MODE == 'bootstrap'
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: stage-release
+          destination: built-release
+
+      - name: Publish
+        env:
+          TAG: ${{ steps.collection.outputs.tag }}
+        run: |
+          W=$GITHUB_WORKSPACE
+          sudo chown -R "$(id -u):$(id -g)" built-* 2>/dev/null || true
+          cd site
+          if [ -d ../built-develop ]; then rm -rf develop && cp -R ../built-develop develop; fi
+          case "$MODE" in
+            release) sh "$W/dashboard/scripts/pages-promote.sh" . "$TAG" ;;
+            collection|bootstrap) sh "$W/dashboard/scripts/pages-promote.sh" . "$TAG" "$W/built-release" ;;
+          esac
+          if [ "$MODE" != develop ]; then
+            printf '{ "release": "%s" }\n' "$(node -p "require('$W/dashboard-main/package.json').version")" > version.json
+          fi
+          printf '%s\n' "$DOMAIN" > CNAME
+          printf 'User-agent: *\nDisallow: /develop/\n' > robots.txt
+          touch .nojekyll
+          git add -A
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          dash=$(git -C "$W/dashboard" rev-parse --short HEAD)
+          git commit -q -m "$MODE: dashboard develop $dash, collection $TAG"
+          git push -q origin gh-pages
+          git log --oneline -1
