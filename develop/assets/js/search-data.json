@@ -48,33 +48,33 @@
     
     "relUrl": "/configuration/"
   },"7": {
-    "doc": "Custom widget",
-    "title": "Custom widget",
-    "content": "Every widget on the dashboard is a package: a folder with a widget.yaml and usually a server.js. Even the widgets behind the dashboard’s own service fields (siteMonitor:, container:, …) come from the widgets collection this way, so anything they do, a widget of yours can do too. Nobody has to merge a pull request here first. my-widget/ widget.yaml the manifest: id, name, apiVersion, options server.js fetch(ctx): asks your service, returns blocks client.js optional: a Web Component for a look of its own i18n.json optional: labels in the dashboard's languages . A widget is written the same way wherever it lives; only how the dashboard gets it differs. Both are listed under plugins: in settings.yaml. |   | Where | For | . | Local widget | A folder next to your config, path: ./my-widgets/x | Something only you need, or trying out a widget while you write it. Start here: it walks through writing one. | . | Remote widget | A git repository or an npm package, source: git+https://...#v1.0.0 | Sharing it: others install it with one line, pinned to a version, and it can be listed in the Catalogue. | . The API reference has every field of widget.yaml, ctx and the result; Security what a widget can reach. ",
-    "url": "/develop/extend/custom-widget/#custom-widget",
-    
-    "relUrl": "/extend/custom-widget/#custom-widget"
-  },"8": {
-    "doc": "Custom widget",
-    "title": "Custom widget",
-    "content": " ",
-    "url": "/develop/extend/custom-widget/",
-    
-    "relUrl": "/extend/custom-widget/"
-  },"9": {
     "doc": "Contributing",
     "title": "Contributing",
     "content": "Working on the dashboard itself, rather than on a widget. | Page | What | . | Architecture | How config, plugins, discovery and the page fit together | . | Development | Running it locally, the tests, the screenshots | . | Publishing | Releases, the image, this documentation site | . | Decisions | Why things are the way they are | . ",
     "url": "/develop/extend/contributing/#contributing",
     
     "relUrl": "/extend/contributing/#contributing"
-  },"10": {
+  },"8": {
     "doc": "Contributing",
     "title": "Contributing",
     "content": " ",
     "url": "/develop/extend/contributing/",
     
     "relUrl": "/extend/contributing/"
+  },"9": {
+    "doc": "Custom widget",
+    "title": "Custom widget",
+    "content": "Every widget on the dashboard is a package: a folder with a widget.yaml and usually a server.js. Even the widgets behind the dashboard’s own service fields (siteMonitor:, container:, …) come from the widgets collection this way, so anything they do, a widget of yours can do too. Nobody has to merge a pull request here first. my-widget/ widget.yaml the manifest: id, name, apiVersion, options server.js fetch(ctx): asks your service, returns blocks client.js optional: a Web Component for a look of its own i18n.json optional: labels in the dashboard's languages . A widget is written the same way wherever it lives; only how the dashboard gets it differs. Both are listed under plugins: in settings.yaml. |   | Where | For | . | Local widget | A folder next to your config, path: ./my-widgets/x | Something only you need, or trying out a widget while you write it. Start here: it walks through writing one. | . | Remote widget | A git repository or an npm package, source: git+https://...#v1.0.0 | Sharing it: others install it with one line, pinned to a version, and it can be listed in the Catalogue. | . The API reference has every field of widget.yaml, ctx and the result; Security what a widget can reach. ",
+    "url": "/develop/extend/custom-widget/#custom-widget",
+    
+    "relUrl": "/extend/custom-widget/#custom-widget"
+  },"10": {
+    "doc": "Custom widget",
+    "title": "Custom widget",
+    "content": " ",
+    "url": "/develop/extend/custom-widget/",
+    
+    "relUrl": "/extend/custom-widget/"
   },"11": {
     "doc": "Extend",
     "title": "Extend",
@@ -841,7 +841,7 @@
   },"120": {
     "doc": "Publishing",
     "title": "Publishing",
-    "content": "CI (.github/workflows/ci.yml) does the work. Changes go to develop; main only moves to develop for a release, and a release is a tag on main. | Event | What CI does | . | Pull request | Tests, an amd64 image build and a smoke test. Nothing is pushed. Into develop, the tests use the widgets collection’s develop branch, otherwise its newest release. | . | Push to develop | Tests (with the collection’s develop branch), then the image for amd64 and arm64, pushed as develop only (version develop-&lt;sha&gt;). A push that changes only docs/, scripts/, tests/, examples/ or Markdown runs the tests only. | . | Push to main | Tests and the image for amd64 and arm64: nothing is pushed. | . | Tag vX.Y.Z | The same, pushed as latest, X.Y.Z and X.Y, and a GitHub release with that version’s CHANGELOG section. The tagged commit must be on main, or nothing is published. | . | Run by hand on main | As a tag, for package.json’s version when it is not released yet: CI creates the tag vX.Y.Z with the release. For when a tag cannot be pushed. | . | Run by hand on develop | As a push to develop (Dependabot’s auto-merge starts these). | . | Monday 04:23 UTC | Rebuild of the newest release (latest, X.Y.Z, X.Y), so base image security fixes arrive without a code change. | . A new push to a branch or a pull request cancels the older CI run of that branch or PR, which is still running. Runs for a tag, by hand and on the schedule are never cancelled. ",
+    "content": "CI (.github/workflows/ci.yml) does the work. Changes go to develop; main only moves to develop for a release, and a release is a tag on main. | Event | What CI does | . | Pull request | Tests, an amd64 image build and a smoke test. Nothing is pushed. Into develop, the tests use the widgets collection’s develop branch, otherwise its newest release. | . | Push to develop | Tests (with the collection’s develop branch), then the image for amd64 and arm64, pushed as develop only (version develop-&lt;sha&gt;). A push that, since the last published image of the branch, changes only docs/, scripts/, tests/, examples/ or Markdown runs the tests only. | . | Push to main | Tests and the image for amd64 and arm64: nothing is pushed. | . | Tag vX.Y.Z | The same, pushed as latest, X.Y.Z and X.Y, and a GitHub release with that version’s CHANGELOG section. The tagged commit must be on main, or nothing is published. | . | Run by hand on main | As a tag, for package.json’s version when it is not released yet: CI creates the tag vX.Y.Z with the release. For when a tag cannot be pushed. | . | Run by hand on develop | As a push to develop (Dependabot’s auto-merge starts these). | . | Monday 04:23 UTC | Rebuild of the newest release (latest, X.Y.Z, X.Y), so base image security fixes arrive without a code change. | . A new push to a branch or a pull request cancels the older CI run of that branch or PR, which is still running. Runs for a tag, by hand and on the schedule are never cancelled. A cancelled run published nothing, so the next push compares with the last commit whose image was published, not with the commit before it: a change to the image in the cancelled push still gets its image. ",
     "url": "/develop/extend/contributing/publishing.html#publishing",
     
     "relUrl": "/extend/contributing/publishing.html#publishing"
