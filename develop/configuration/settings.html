@@ -39,6 +39,7 @@
                     <span class="c1"># `core v0.7.3 | widgets v0.4.1`, each linking to its release or commit</span>
 <span class="na">pluginUpdateInterval</span><span class="pi">:</span> <span class="s">1h</span>   <span class="c1"># how often #latest and branch plugins are checked for a newer version (false: never)</span>
 <span class="na">allowedHosts</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">dash.lan</span><span class="pi">]</span>   <span class="c1"># the names you open the dashboard by (IP addresses always work); see Allowed hosts</span>
+<span class="na">trustedProxies</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">172.18.0.0/16</span><span class="pi">]</span>   <span class="c1"># the reverse proxies whose X-Forwarded-For counts (not set: any private address); see Wrong passwords</span>
 <span class="na">adminPassword</span><span class="pi">:</span> <span class="s2">"</span><span class="s">scrypt:16384:8:1:..."</span>   <span class="c1"># the admin password's hash (node src/hash-password.mjs); see Admin password</span>
 <span class="na">login</span><span class="pi">:</span> <span class="no">true</span>                <span class="c1"># a login page with the admin password ({ remember: 7d }); see Login page</span>
 <span class="na">actions</span><span class="pi">:</span>
